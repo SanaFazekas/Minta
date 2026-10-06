@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pravopis vlastných podstatných mien - Test</title>
+    <style>
+        :root {
+            --primary-bg: #FDEBD0; /* Barackvirág / világos narancs minta alapján */
+            --panel-bg: #FFFFFF;
+            --accent-orange: #E67E22;
+            --accent-orange-dark: #D35400;
+            --text-color: #2C3E50;
+            --border-color: #F5B041;
+            --success: #27AE60;
+            --danger: #C0392B;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Settings */
+        .sidebar {
+            width: 380px;
+            background: var(--panel-bg);
+            border-right: 2px solid var(--border-color);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.05);
+            flex-shrink: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            font-size: 1.1rem;
+            color: var(--accent-orange-dark);
+            margin: 0;
+            border-bottom: 2px solid var(--accent-orange);
+            padding-bottom: 5px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        select, input[type="text"] {
+            padding: 6px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            width: 100%;
+        }
+
+        .mode-toggle {
+            display: flex;
+            background: #FEF9E7;
+            border-radius: 6px;
+            padding: 3px;
+            gap: 3px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 6px;
+            border: none;
+            background: transparent;
+            font-weight: bold;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .mode-btn.active {
+            background: var(--accent-orange);
+            color: white;
+        }
+
+        .btn {
+            background: var(--accent-orange);
+            color: white;
+            border: none;
+            padding: 8px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .btn:hover { opacity: 0.9; }
+        .btn-success { background: var(--success); }
+        .btn-danger { background: var(--danger); }
+        .btn-dark { background: var(--text-color); }
+
+        /* Main Content */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px 30px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .header-bar {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        }
+
+        .app-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--accent-orange-dark);
+        }
+
+        /* Summary Banner */
+        .summary-banner {
+            background: #FEF9E7;
+            border: 2px solid var(--accent-orange);
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .summary-banner h3 {
+            margin: 0;
+            color: var(--accent-orange-dark);
+            font-size: 1.2rem;
+        }
+
+        /* Task List Layout */
+        .tasks-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+            max-width: 950px;
+            margin-bottom: 20px;
+        }
+
+        .task-card {
+            background: white;
+            padding: 16px 20px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .task-question {
+            font-weight: bold;
+            font-size: 1.05rem;
+        }
+
+        /* ABCD Options Style (minta alapján) */
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: #F9F9F9;
+            border: 1px solid #E5E7E9;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .option-label:hover {
+            background: #FEF5E7;
+        }
+
+        .option-badge {
+            width: 28px;
+            height: 28px;
+            background: var(--accent-orange);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        /* Solution Breakdown Box */
+        .solution-breakdown {
+            background-color: #FDEDEC;
+            border-left: 4px solid var(--danger);
+            padding: 10px 14px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #78281F;
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
+        /* Statistics Table */
+        .stats-wrapper {
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+            text-align: center;
+        }
+
+        th, td {
+            padding: 5px 4px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--accent-orange);
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+
+        @media print {
+            .sidebar, .header-bar button, .summary-banner, #submit-container, .solution-breakdown {
+                display: none !important;
+            }
+            body {
+                height: auto;
+                background: white;
+            }
+            .main-content {
+                padding: 0;
+                overflow: visible;
+            }
+            .task-card {
+                border: 1px solid #000;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR / NASTAVENIA -->
+    <div class="sidebar">
+        <h2>⚙️ Nastavenia testu</h2>
+
+        <div class="form-group">
+            <label>Režim:</label>
+            <div class="mode-toggle">
+                <button id="btn-mode-ind" class="mode-btn active" onclick="setWorkMode('individual')">Individuálny</button>
+                <button id="btn-mode-grp" class="mode-btn" onclick="setWorkMode('group')">Skupinový</button>
+            </div>
+        </div>
+
+        <div class="form-group" id="student-name-group">
+            <label for="student-name">Meno žiaka:</label>
+            <input type="text" id="student-name" placeholder="Zadajte meno...">
+        </div>
+
+        <div class="form-group">
+            <label for="count-select">Počet úloh:</label>
+            <select id="count-select" onchange="generateNewSeries()">
+                <option value="5" selected>5 úloh</option>
+                <option value="10">10 úloh</option>
+            </select>
+        </div>
+
+        <button class="btn btn-success" onclick="generateNewSeries()">Nová séria 🔄</button>
+
+        <div style="margin-top: 10px;">
+            <h2>📊 Štatistika</h2>
+            <div class="stats-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Meno</th>
+                            <th>Body</th>
+                            <th>%</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stats-tbody"></tbody>
+                </table>
+            </div>
+            <div style="display: flex; gap: 5px; margin-top: 8px;">
+                <button class="btn btn-dark" style="flex: 1;" onclick="downloadPDF()">PDF 📄</button>
+                <button class="btn btn-danger" style="flex: 1;" onclick="clearStats()">Zmazať 🗑️</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="main-content" id="main-content-area">
+        <div class="header-bar">
+            <div class="app-title">Test zo slovenského jazyka: Vlastné podstatné mená (11-12 roční)</div>
+            <div id="display-student-info" style="font-weight: bold; font-size: 1.05rem;"></div>
+        </div>
+
+        <div id="summary-banner" class="summary-banner">
+            <h3 id="summary-title">Vyhodnotenie testu</h3>
+            <div id="summary-details" style="font-weight: 600;"></div>
+        </div>
+
+        <div id="tasks-wrapper" class="tasks-container"></div>
+
+        <div id="submit-container" style="margin-top: 10px; display: flex; gap: 10px;">
+            <button id="btn-check" class="btn btn-success" style="font-size: 1.1rem; padding: 10px 20px;" onclick="checkAnswers()">Skontrolovať odpovede ✨</button>
+            <button id="btn-show-key" class="btn btn-dark" style="font-size: 1.1rem; padding: 10px 20px; display: none;" onclick="toggleAnswerKey()">Kľúč správnych odpovedí 🔑</button>
+        </div>
+    </div>
+
+<script>
+let currentMode = 'individual';
+let generatedTasks = [];
+let answerKeyVisible = false;
+
+// Adatbázis 11-12 éveseknek szóló szlovák tulajdonnév feladatokhoz (ABCD opciókkal)
+const tasksDatabase = [
+    {
+        question: "V ktorej možnosti sú všetky slová napísané s veľkými začiatočnými písmenami správne (vlastné podstatné mená)?",
+        options: [
+            { text: "Dunaj, Tatry, brat, júl", correct: false },
+            { text: "Dunaj, Tatry, Slovensko, Košice", correct: true },
+            { text: "dunaj, tatry, slovensko, košice", correct: false },
+            { text: "Dunaj, tatry, Slovensko, košice", correct: false }
+        ],
+        explanation: "Názvy riek (Dunaj), pohorí (Tatry), štátov (Slovensko) a miest (Košice) píšeme vždy s veľkým začiatočným písmenom."
+    },
+    {
+        question: "Ktorá možnosť obsahuje správne priradený názov zvieraťa (vlastné meno) a druhu?",
+        options: [
+            { text: "pes - dunčo", correct: false },
+            { text: "mačka - micka", correct: false },
+            { text: "pes - Dunčo", correct: true },
+            { text: "kôň - blesk", correct: false }
+        ],
+        explanation: "Mená zvierat sú vlastné podstatné mená a píšu sa s veľkým začiatočným písmenom (Dunčo)."
+    },
+    {
+        question: "Ktorá z možností obsahuje iba zemepisné názvy (geografické názvy)?",
+        options: [
+            { text: "Bratislava, Dunaj, Nitra, Váh", correct: true },
+            { text: "Bratislava, Janko, Dunaj, piatok", correct: false },
+            { text: "Slovensko, Maďarsko, marec, Tatry", correct: false },
+            { text: "Košice, Fero, Dunaj, Tímea", correct: false }
+        ],
+        explanation: "Bratislava, Dunaj, Nitra a Váh sú výlučne zemepisné názvy (miesta a rieky)."
+    },
+    {
+        question: "Ktorá veta má správne napísané veľké začiatočné písmená v názvoch inštitúcií alebo diel?",
+        options: [
+            { text: "Čítali sme knihu opustená rúbaň.", correct: false },
+            { text: "Navštívili sme Slovenské národné múzeum.", correct: true },
+            { text: "Naša škola sídli na ul. Hlavnej.", correct: false },
+            { text: "Boli sme v kino Palace.", correct: false }
+        ],
+        explanation: "Názvy inštitúcií, ako napr. Slovenské národné múzeum, sa píšu s veľkými začiatočnými písmenami."
+    },
+    {
+        question: "Ktoré slovo v nasledujúcej skupine NEPATRÍ medzi vlastné podstatné mená?",
+        options: [
+            { text: "Matúš", correct: false },
+            { text: "Trnava", correct: false },
+            { text: "učiteľ", correct: true },
+            { text: "Lendak", correct: false }
+        ],
+        explanation: "Slovo 'učiteľ' je všeobecné podstatné meno, kým ostatné sú vlastné mená."
+    },
+    {
+        question: "Ktorá možnosť správne rozlišuje vlastné a všeobecné meno v dvojici?",
+        options: [
+            { text: "mesto - Zvolen", correct: true },
+            { text: "chlapec - ján", correct: false },
+            { text: "rieka - dunaj", correct: false },
+            { text: "pes - dunčo", correct: false }
+        ],
+        explanation: "'Mesto' je všeobecné podstatné meno, zatiaľ čo 'Zvolen' je konkrétne vlastné meno."
+    },
+    {
+        question: "Ktorá skupina obsahuje iba krstné mená ľudí?",
+        options: [
+            { text: "Peter, Zuzana, Martin, Lucia", correct: true },
+            { text: "Peter, Dunaj, Zuzana, Tatry", correct: false },
+            { text: "Bratislava, Košice, Nitra, Trnava", correct: false },
+            { text: "Frakk, Dunčo, Alík, Mura", correct: false }
+        ],
+        explanation: "Peter, Zuzana, Martin a Lucia sú osobné (krstné) mená."
+    },
+    {
+        question: "Vyberte možnosť, kde je názov sviatku napísaný správne:",
+        options: [
+            { text: "Deň matiek", correct: true },
+            { text: "deň matiek", correct: false },
+            { text: "deň Matiek", correct: false },
+            { text: "Deň Matiek", correct: false }
+        ],
+        explanation: "V názvoch významných dní a sviatkov sa prvé slovo píše s veľkým písmenom (Deň matiek)."
+    },
+    {
+        question: "Aký je správny pravopis názvu pohoria a vrchu?",
+        options: [
+            { text: "vysoké tatry", correct: false },
+            { text: "Nízke tatry", correct: false },
+            { text: "Vysoké Tatry", correct: true },
+            { text: "vysoké Tatry", correct: false }
+        ],
+        explanation: "Vo viacslovných geografických názvoch sa píše veľké začiatočné písmeno v každom plnovýznamovom slove (Vysoké Tatry)."
+    },
+    {
+        question: "Ktorá možnosť obsahuje správne napísaný názov ulice?",
+        options: [
+            { text: "hlavná ulica", correct: false },
+            { text: "Hlavná Ulica", correct: false },
+            { text: "Hlavná ul.", correct: false },
+            { text: "Hlavná ulica (alebo Hlavná)", correct: true }
+        ],
+        explanation: "V názvoch ulíc sa prvé slovo píše s veľkým začiatočným písmenom (Hlavná ulica)."
+    }
+];
+
+function setWorkMode(mode) {
+    currentMode = mode;
+    document.getElementById('btn-mode-ind').classList.toggle('active', mode === 'individual');
+    document.getElementById('btn-mode-grp').classList.toggle('active', mode === 'group');
+    
+    const nameGroup = document.getElementById('student-name-group');
+    const checkBtn = document.getElementById('btn-check');
+    const keyBtn = document.getElementById('btn-show-key');
+    document.getElementById('summary-banner').style.display = 'none';
+
+    if (mode === 'group') {
+        nameGroup.style.display = 'none';
+        checkBtn.style.display = 'none';
+        keyBtn.style.display = 'inline-flex';
+    } else {
+        nameGroup.style.display = 'flex';
+        checkBtn.style.display = 'inline-flex';
+        keyBtn.style.display = 'none';
+    }
+    generateNewSeries();
+}
+
+function generateNewSeries() {
+    if (currentMode === 'individual') {
+        const name = document.getElementById('student-name').value.trim();
+        if (!name) {
+            alert('Prosím, zadajte meno žiaka pre individuálny režim!');
+            return;
+        }
+    }
+
+    const count = parseInt(document.getElementById('count-select').value);
+    let shuffled = [...tasksDatabase].sort(() => 0.5 - Math.random());
+    generatedTasks = shuffled.slice(0, count);
+    answerKeyVisible = false;
+    document.getElementById('summary-banner').style.display = 'none';
+
+    renderTasks();
+}
+
+function renderTasks() {
+    const wrapper = document.getElementById('tasks-wrapper');
+    wrapper.innerHTML = '';
+
+    const name = document.getElementById('student-name').value.trim();
+    document.getElementById('display-student-info').innerText = (currentMode === 'individual' && name) ? `Žiak: ${name}` : '';
+
+    const letters = ['A', 'B', 'C', 'D'];
+
+    generatedTasks.forEach((task, idx) => {
+        const card = document.createElement('div');
+        card.className = 'task-card';
+
+        let optionsHtml = '<div class="options-grid">';
+        task.options.forEach((opt, optIdx) => {
+            const letter = letters[optIdx];
+            let extraStyle = '';
+            
+            if (currentMode === 'group' && answerKeyVisible && opt.correct) {
+                extraStyle = 'background: #EAFAF1; border-color: #27AE60; font-weight: bold;';
+            }
+
+            optionsHtml += `
+                <label class="option-label" style="${extraStyle}">
+                    <input type="radio" name="task-${idx}" value="${optIdx}" style="display:none;" ${currentMode === 'group' ? 'disabled' : ''}>
+                    <div class="option-badge">${letter}</div>
+                    <span>${opt.text}</span>
+                </label>
+            `;
+        });
+        optionsHtml += '</div>';
+
+        card.innerHTML = `
+            <div class="task-question"><strong>${idx + 1}.</strong> ${task.question}</div>
+            ${optionsHtml}
+            <div class="solution-breakdown" id="breakdown-${idx}">
+                <strong>Vysvetlenie / Správna odpoveď:</strong> 
+                <div>${task.explanation}</div>
+            </div>
+        `;
+        wrapper.appendChild(card);
+    });
+}
+
+function toggleAnswerKey() {
+    answerKeyVisible = !answerKeyVisible;
+    renderTasks();
+}
+
+function checkAnswers() {
+    let correctCount = 0;
+    generatedTasks.forEach((task, idx) => {
+        const breakdownBox = document.getElementById(`breakdown-${idx}`);
+        const selectedRadio = document.querySelector(`input[name="task-${idx}"]:checked`);
+        
+        let userChoice = selectedRadio ? parseInt(selectedRadio.value) : -1;
+        let correctChoice = task.options.findIndex(o => o.correct);
+
+        if (userChoice === correctChoice) {
+            correctCount++;
+            if (breakdownBox) breakdownBox.style.display = 'none';
+        } else {
+            if (breakdownBox) breakdownBox.style.display = 'flex';
+        }
+    });
+
+    const total = generatedTasks.length;
+    const name = document.getElementById('student-name').value.trim() || 'Žiak';
+    const percent = Math.round((correctCount / total) * 100);
+
+    const banner = document.getElementById('summary-banner');
+    document.getElementById('summary-title').innerText = `Vyhodnotenie testu - ${name}`;
+    document.getElementById('summary-details').innerHTML = `Skóre: ${correctCount} / ${total} (${percent}%)`;
+    banner.style.display = 'flex';
+
+    document.getElementById('main-content-area').scrollTop = 0;
+    saveStat(name, `${correctCount}/${total}`, `${percent}%`);
+}
+
+function saveStat(name, score, percent) {
+    let stats = JSON.parse(localStorage.getItem('slovak_tulajdonnevek_stats') || '[]');
+    stats.push({ name: name, score: score, percent: percent });
+    localStorage.setItem('slovak_tulajdonnevek_stats', JSON.stringify(stats));
+    renderStats();
+}
+
+function renderStats() {
+    let stats = JSON.parse(localStorage.getItem('slovak_tulajdonnevek_stats') || '[]');
+    const tbody = document.getElementById('stats-tbody');
+    tbody.innerHTML = '';
+    stats.forEach(s => {
+        tbody.innerHTML += `
+            <tr>
+                <td>${s.name}</td>
+                <td><strong>${s.score}</strong></td>
+                <td><strong>${s.percent}</strong></td>
+            </tr>
+        `;
+    });
+}
+
+function clearStats() {
+    if (confirm('Naozaj chcete vymazať štatistiku?')) {
+        localStorage.removeItem('slovak_tulajdonnevek_stats');
+        renderStats();
+    }
+}
+
+function downloadPDF() {
+    window.print();
+}
+
+window.onload = () => {
+    renderStats();
+    generateNewSeries();
+};
+</script>
+</body>
+</html>
